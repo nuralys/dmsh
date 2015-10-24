@@ -7,6 +7,8 @@
 echo $this->Form->create('Page', array('type' => 'file'));
 echo $this->Form->input('title', array('label' => 'Название:'));
 echo $this->Form->input('body', array('label' => 'Текст:', 'id' => 'editor'));
+echo $this->Form->input('keywords', array('label' => 'Ключевые слова:'));
+echo $this->Form->input('description', array('label' => 'Описание:'));
 ?>
 <div class="edit_bot">
 	

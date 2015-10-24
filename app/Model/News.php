@@ -3,13 +3,19 @@
 class News extends AppModel{
 	public $actsAs = array(
 		'Translate' => array(
-			'title' => '_title',
-			'body' => '_body'
+			'title',
+			'body'
+			// ,
+			// 'keywords',
+			// 'description'
 			)
 		);
-	public $locale = 'ru';
+	// public $displayField = 'title';
+	// public $name = 'News';
+	// // public $locale = 'ru';
 
-	public $translateModel = 'NewsI18n';
+	// public $translateModel = 'NewsI18n';
+	// public $translateTable = 'i18n'; //если че удалить
 	public $validate = array(
 		'title' => array(
 			'rule' => 'notEmpty',

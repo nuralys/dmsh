@@ -1,7 +1,11 @@
 <?php 
 
 class Gallery extends AppModel{
-
+	public $actsAs = array(
+		'Translate' => array(
+			'title'
+			)
+		);
 	public $validate = array(
 		'title' => array(
 			'rule' => 'notEmpty',

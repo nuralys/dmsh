@@ -44,6 +44,8 @@ class AppController extends Controller {
 	public $helpers = array('Html', 'Form', 'Session');
 
     public function beforeFilter() {
+
+        // debug($this->request->params);
         parent::beforeFilter();
         // debug($this->request->params['prefix']);
         $admin = (isset($this->request->params['prefix']) && $this->request->params['prefix'] == 'admin') ? 'admin/' : false;
@@ -51,12 +53,15 @@ class AppController extends Controller {
         if($admin){
             $this->layout = 'default';
         }else{
-            $this->layout = 'default';
+            $this->layout = 'index';
         }
 
-        if($this->params['language']){
+        if(isset($this->params['language']) && $this->params['language'] == 'kz'){
             Configure::write('Config.language', 'kz');
+        }else{
+            Configure::write('Config.language', 'ru');
         }
+        // debug($this->request->params);
         // debug($this->params['language']);
         $lang = ($this->params['language']) ? $this->params['language'] . '/' : '';
         $this->set(compact('admin', 'lang'));

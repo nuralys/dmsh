@@ -1,51 +1,38 @@
 <?php
-/**
- * Static content controller.
- *
- * This file will render views from views/pages/
- *
- * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
- * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- *
- * Licensed under The MIT License
- * For full copyright and license information, please see the LICENSE.txt
- * Redistributions of files must retain the above copyright notice.
- *
- * @copyright     Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
- * @link          http://cakephp.org CakePHP(tm) Project
- * @package       app.Controller
- * @since         CakePHP(tm) v 0.2.9
- * @license       http://www.opensource.org/licenses/mit-license.php MIT License
- */
 
-App::uses('AppController', 'Controller');
-
-/**
- * Static content controller
- *
- * Override this controller by placing a copy in controllers directory of an application
- *
- * @package       app.Controller
- * @link http://book.cakephp.org/2.0/en/controllers/pages-controller.html
- */
 class PagesController extends AppController {
 
-/**
- * This controller does not use a model
- *
- * @var array
- */
-	public $uses = array();
+	public $uses = array('Page', 'News');
 
 	public function beforeFilter(){
 		parent::beforeFilter();
 	}
 
 	public function index(){
-		// $this->layout = 'index';
+		$this->Page->locale = Configure::read('Config.language');
+		$this->Page->bindTranslation(array('title' => 'titleTranslation', 'body' => 'bodyTranslation'));
+		$this->News->locale = Configure::read('Config.language');
+		$news = $this->News->find('all', array(
+			'fields' => array('id', 'title'),
+			'order' => array('News.created' => 'desc'),
+			'limit' => 3
+			));
+			
+		
+		$page = $this->Page->findById(1);
+		if(!$page){
+			throw new NotFoundException("Такой страницы нету");
+		}
+		$title_for_layout = $page['Page']['title'];
+		$meta['keywords'] = $page['Page']['keywords'];
+		$meta['description'] = $page['Page']['description'];
+		$this->set(compact('page', 'title_for_layout', 'meta', 'news'));
 	}
 
 	public function page($page_alias = null){
+		$this->Page->locale = Configure::read('Config.language');
+		$this->Page->bindTranslation(array('title' => 'titleTranslation', 'body' => 'bodyTranslation'));
+		$this->News->locale = Configure::read('Config.language');
 		if(is_null($page_alias)){
 			throw new NotFoundException("Такой страницы нету");
 		}
@@ -53,13 +40,21 @@ class PagesController extends AppController {
 		if(!$page){
 			throw new NotFoundException("Такой страницы нету");
 		}
+		
 		$title_for_layout = $page['Page']['title'];
 		$meta['keywords'] = $page['Page']['keywords'];
 		$meta['description'] = $page['Page']['description'];
-		$this->set(compact('page_alias', 'page', 'title_for_layout', 'meta'));
+		$news = $this->News->find('all', array(
+			'fields' => array('id', 'title'),
+			'order' => array('News.created' => 'desc'),
+			'limit' => 3
+			));
+		$this->set(compact('page_alias', 'page', 'title_for_layout', 'meta', 'news'));
 	}
 
 	public function admin_index(){
+		$this->Page->locale = 'ru';
+		$this->Page->bindTranslation(array('title' => 'titleTranslation', 'body' => 'bodyTranslation'));
 		$pages = $this->Page->find('all');
 		$test = 'test';
 		$this->set(compact('pages', 'test'));
@@ -67,13 +62,30 @@ class PagesController extends AppController {
 
 	public function admin_edit($page_id){
 		
-		$page = $this->Page->findById($page_id);
+		if(is_null($page_id) || !(int)$page_id || !$this->Page->exists($page_id)){
+			throw new NotFoundException('Такой страницы нет...');
+		}
+		$data = $this->Page->findById($page_id);
 		if(!$page_id){
 			throw new NotFoundException('Такой страницы нет...');
 		}
 		if($this->request->is(array('post', 'put'))){
 			$this->Page->id = $page_id;
-			if($this->Page->save($this->request->data)){
+			// $this->Page->locale = Configure::read('Config.languages');
+			// debug($this->Page->locale);
+			// debug($this->request->data);
+			$data1 = $this->request->data['Page'];
+			
+
+			if(isset($this->request->query['lang']) && $this->request->query['lang'] == 'kz'){
+				$this->Page->locale = 'kz';
+			}else{
+				$this->Page->locale = 'ru';
+			}
+			// $this->Page->locale = 'kz';
+			// debug($data1);
+			$data1['id'] = $page_id;
+			if($this->Page->save($data1)){
 				$this->Session->setFlash('Сохранено', 'default', array(), 'good');
 				return $this->redirect($this->referer());
 			}else{
@@ -81,11 +93,16 @@ class PagesController extends AppController {
 			}
 		}
 		//Заполняем данные в форме
-		if(!$this->request->data){
-			$this->request->data = $page;
-			
-			$this->set(compact('page_id', 'page'));
+		if($this->request->is('post')){
+			$this->request->data = $data1;
+			$data = $data1;
+		}else{
+			$this->Page->locale = $this->request->query['lang'];
+			$data = $this->request->data = $this->Page->read(null, $page_id);
 		}
+			$this->set(compact('page_id', 'data'));
+
+
 	}
 /**
  * Displays a view

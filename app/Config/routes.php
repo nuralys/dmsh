@@ -29,19 +29,34 @@
 	Router::connect('/news', array('controller' => 'news', 'action' => 'index'));
 	Router::connect('/contacts', array('controller' => 'contacts', 'action' => 'index'));
 	Router::connect('/admin', array('controller' => 'pages', 'action' => 'index', 'admin' => true));
-	Router::connect('/:language', array('controller' => 'pages', 'action' => 'index', 'Главная'));
+	Router::connect('/:language', array('controller' => 'pages', 'action' => 'index'));
+
+	// Router::connect('/:language/pages/*', 
+	// 	array('controller' => 'pages', 'action' => 'page'),
+	// 	array('language' => '[a-z]{2}')
+	// );
 	Router::connect('/:language/pages/*', 
 		array('controller' => 'pages', 'action' => 'page'),
 		array('language' => '[a-z]{2}')
 	);
+	Router::connect('/:language/news/view/*', 
+		array('controller' => 'news', 'action' => 'view'),
+		array('language' => '[a-z]{2}')
+	);
 	Router::connect('/:language/:controller/:action/*', 
-		array(),
+		array('controller' => ':controller', 'action' => ':action', '*'),
 		array('language' => '[a-z]{2}')
 	);
 	Router::connect('/:language/:controller/*', 
-		array(),
+		array('controller' => ':controller', 'action' => 'index', '*'),
 		array('language' => '[a-z]{2}')
 	);
+	
+
+	// Router::connect('/:language/:controller/*', 
+	// 	array(),
+	// 	array('language' => '[a-z]{2}')
+	// );
 	Router::connect('/admin/users/:action', array('controller' => 'users'));
 	Router::connect('/admin/service/:action/*', array('controller' => 'services', 'admin' => true));
 	Router::connect('/', array('controller' => 'pages', 'action' => 'index', 'Главная'));

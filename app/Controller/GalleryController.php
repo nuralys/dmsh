@@ -2,13 +2,23 @@
 
 class GalleryController extends AppController{
 
+	public $uses = array('Gallery', 'News');
+	
 	public function index(){
-			$data = $this->Gallery->find('all');
-			
-			$this->set(compact('data'));
-		}
+		$this->Gallery->locale = Configure::read('Config.language');
+		$this->News->locale = Configure::read('Config.language');
+		$data = $this->Gallery->find('all');
+		$news = $this->News->find('all', array(
+			'fields' => array('id', 'title'),
+			'order' => array('News.created' => 'desc'),
+			'limit' => 3
+			));
+		$this->set(compact('data', 'news'));
+	}
 
 	public function admin_index(){
+			$this->Gallery->locale = 'ru';
+			$this->Gallery->bindTranslation(array('title' => 'titleTranslation'));
 			$data = $this->Gallery->find('all');
 			$this->set(compact('data'));
 		}
@@ -19,6 +29,11 @@ class GalleryController extends AppController{
 			$data = $this->request->data['Gallery'];
 			if(!$data['img']['name']){
 				unset($data['img']);
+			}
+			if(isset($this->request->query['lang']) && $this->request->query['lang'] == 'kz'){
+				$this->Gallery->locale = 'kz';
+			}else{
+				$this->Gallery->locale = 'ru';
 			}
 			if($this->Gallery->save($data)){
 				$this->Session->setFlash('Сохранено', 'default', array(), 'good');
@@ -44,6 +59,12 @@ class GalleryController extends AppController{
 			if(!$data1['img']['name']){
 				unset($data1['img']);
 			}
+			if(isset($this->request->query['lang']) && $this->request->query['lang'] == 'kz'){
+				$this->Gallery->locale = 'kz';
+			}else{
+				$this->Gallery->locale = 'ru';
+			}
+			$data1['id'] = $id;
 			if($this->Gallery->save($data1)){
 				$this->Session->setFlash('Сохранено', 'default', array(), 'good');
 				return $this->redirect($this->referer());
@@ -53,11 +74,15 @@ class GalleryController extends AppController{
 			}
 		}
 		//Заполняем данные в форме
-		if(!$this->request->data){
-			$this->request->data = $data;
-			
-			$this->set(compact('id', 'data'));
+		//Заполняем данные в форме
+		if($this->request->is('post')){
+			$this->request->data = $data1;
+			$data = $data1;
+		}else{
+			$this->Gallery->locale = $this->request->query['lang'];
+			$data = $this->request->data = $this->Gallery->read(null, $id);
 		}
+			$this->set(compact('id', 'data'));
 	}
 
 	public function admin_delete($id){

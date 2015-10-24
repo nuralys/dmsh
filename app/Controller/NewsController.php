@@ -7,13 +7,17 @@ class NewsController extends AppController{
 	}
 
 	public function index(){
-		$this->News->locale = false;
+		// $this->News->locale = false;
+		$this->News->locale = Configure::read('Config.language');
 		$data = $this->News->find('all');
 		$this->set(compact('data'));
 	}
 
 	public function admin_index(){
+		$this->News->locale = 'ru';
+		$this->News->bindTranslation(array('title' => 'titleTranslation', 'body' => 'bodyTranslation'));
 		$data = $this->News->find('all');
+		// debug($data);
 		$this->set(compact('data'));
 	}
 
@@ -21,10 +25,18 @@ class NewsController extends AppController{
 		if($this->request->is('post')){
 			$this->News->create();
 			$data = $this->request->data['News'];
+			// debug($this->request->data);
 			// debug($data);
 			 if(!$data['img']['name']){
 			 	unset($data['img']);
 			}
+			if(isset($this->request->query['lang']) && $this->request->query['lang'] == 'kz'){
+				$this->News->locale = 'kz';
+			}else{
+				$this->News->locale = 'ru';
+			}
+			// $this->News->locale = 'ru';
+
 			if($this->News->save($data)){
 				$this->Session->setFlash('Сохранено', 'default', array(), 'good');
 				// debug($data);
@@ -36,6 +48,7 @@ class NewsController extends AppController{
 	}
 
 	public function admin_edit($id){
+		
 		if(is_null($id) || !(int)$id || !$this->News->exists($id)){
 			throw new NotFoundException('Такой страницы нет...');
 		}
@@ -45,13 +58,22 @@ class NewsController extends AppController{
 		}
 		if($this->request->is(array('post', 'put'))){
 			$this->News->id = $id;
-			$this->News->locale = Configure::read('Config.languages');
+			// $this->News->locale = Configure::read('Config.languages');
 			// debug($this->News->locale);
 			// debug($this->request->data);
 			$data1 = $this->request->data['News'];
 			if(!$data1['img']['name']){
 				unset($data1['img']);
 			}
+
+			if(isset($this->request->query['lang']) && $this->request->query['lang'] == 'kz'){
+				$this->News->locale = 'kz';
+			}else{
+				$this->News->locale = 'ru';
+			}
+			// $this->News->locale = 'kz';
+			// debug($data1);
+			$data1['id'] = $id;
 			if($this->News->save($data1)){
 				$this->Session->setFlash('Сохранено', 'default', array(), 'good');
 				return $this->redirect($this->referer());
@@ -60,11 +82,36 @@ class NewsController extends AppController{
 			}
 		}
 		//Заполняем данные в форме
-		if(!$this->request->data){
-			$this->request->data = $data;
-			
-			$this->set(compact('id', 'data'));
+		if($this->request->is('post')){
+			$this->request->data = $data1;
+			$data = $data1;
+		}else{
+			$this->News->locale = $this->request->query['lang'];
+			$data = $this->request->data = $this->News->read(null, $id);
 		}
+			$this->set(compact('id', 'data'));
+
+
+	}
+	public function test($id){
+		// debug($id);
+		$this->autoRender = false;
+
+		$this->News->locale = Configure::read('Config.language');
+		$this->News->locale = 'kz';
+		$this->News->bindTranslation(array('title' => 'titleTranslation'));
+		debug($this->News->findById($id));
+		
+	}
+	public function test2($id=null){
+		// debug($id);
+		$this->autoRender = false;
+		$this->News->locale = 'kz';
+		$this->News->save(array(
+			'id' => 23,
+			'title' => 5555
+			));
+		
 	}
 
 	public function admin_delete($id){
@@ -83,6 +130,8 @@ class NewsController extends AppController{
 		if(is_null($id) || !(int)$id || !$this->News->exists($id)){
 			throw new NotFoundException('Такой страницы нет...');
 		}
+		$this->News->locale = Configure::read('Config.language');
+		$this->News->bindTranslation(array('title' => 'titleTranslation', 'body' => 'bodyTranslation'));
 		$post = $this->News->findById($id);
 		$news = $this->News->find('all', array(
 			'fields' => array('id', 'title')
