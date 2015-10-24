@@ -58,11 +58,11 @@ printing and typesetting industry
 				<section class="tops" id="tops">
 					<section class="slider" >
 						<div class="slider__item">
-							<img src="/img/slider1.jpg" alt=""></div>
+							<img src="/img/slider1.jpg" alt="фортепиано - dmsh2astana.kz"></div>
 						<div class="slider__item">
-							<img src="/img/slider1.jpg" alt=""></div>
+							<img src="/img/slider2.jpg" alt="казахские народные инструменты - dmsh2astana.kz"></div>
 						<div class="slider__item">
-							<img src="/img/slider1.jpg" alt=""></div>
+							<img src="/img/slider3.jpg" alt="русские народные инструменты - dmsh2astana.kz"></div>
 					</section>
 					<div class="slider_bg"></div>
 				</section>
